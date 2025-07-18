@@ -1,7 +1,7 @@
 ---
 #####
 #
-# @name MyINFRA.eu ~ Ansible <name> Role
+# @name MyINFRA.eu ~ Ansible Lynis Role
 # @version 2025.07-001
 # @since 2025.07-001
 #
@@ -11,7 +11,7 @@
 #
 ###
 #
-# Ansible role for <description>
+# Ansible role for lynis management
 #
 #####
 
@@ -19,12 +19,71 @@
   ansible.builtin.debug:
     msg:
       - "MyINFRA.eu ~ Ansible <name> Role"
-      - "Version   : 2025.07-001"
+      - "Version   : {{ myinfra.lynis.version }}"
       - "Copyright : (c) 2025 (and beyond) - Dennis de Houx, All In One, One For The code"
       - "Author    : Dennis de Houx <dennis@dehoux.be>"
       - "License   : https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en CC BY-NC-ND 4.0"
 
-- name: "Load: Gather facts tasks"
-  ansible.builtin.import_tasks: gather.yml
+- name: "LYNIS > Install package"
+  ansible.builtin.apt:
+    name: "lynis"
+    state: "{{ packages.state | default('present') }}"
+    update_cache: "{{ packages.cache.update | default(true) }}"
+    cache_valid_time: "{{ packages.cache.time | default(3600) }}"
+    install_recommends: "{{ packages.recommends | default(false) }}"
+  become: true
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - lynis is defined and lynis is true
   tags:
-    - <short_name>_gather_facts
+    - lynis_install
+
+- name: "LYNIS > Remove package"
+  ansible.builtin.apt:
+    name: "lynis"
+    state: absent
+    autoremove: "{{ packages.autoremove | default(false) }}"
+    fail_on_autoremove: true
+    update_cache: "{{ packages.cache.update | default(true) }}"
+    cache_valid_time: "{{ packages.cache.time | default(3600) }}"
+  become: true
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - lynis is not defined or lynis is false
+  tags:
+    - lynis_remove
+
+- name: "LYNIS > Run system audit"
+  ansible.builtin.command:
+    cmd: lynis
+    argv:
+      - audit
+      - system
+      - --quick
+      - --auditor "Ansible"
+    chdir: "/root"
+  register: lynis_audit_output
+  become: true
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - lynis is defined and lynis is true
+  tags:
+    - lynis_audit
+
+- name: "LYNIS > Run pentest (non-privileged)"
+  ansible.builtin.command:
+    cmd: lynis
+    argv:
+      - audit
+      - system
+      - --pentest
+      - --quick
+      - --auditor "Ansible"
+    chdir: "/root"
+  register: lynis_pentest_output
+  become: false
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - lynis is defined and lynis is true
+  tags:
+    - lynis_pentest
