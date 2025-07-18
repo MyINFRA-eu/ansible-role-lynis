@@ -5,7 +5,7 @@ galaxy_info:
   role_name: "lynis"
   namespace: "myinfra_eu"
   author: "Dennis-de-Houx"
-  description: "<description>."
+  description: "Install and manage lynis."
   company: "All In One - MyINFRA.eu"
   license: "CC BY-NC-ND 4.0"
   issue_tracker_url: https://github.com/MyINFRA-eu/<name>/issues
