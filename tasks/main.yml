@@ -27,7 +27,7 @@
 - name: "LYNIS > Install package"
   ansible.builtin.apt:
     name: "lynis"
-    state: "{{ packages.state | default('present') }}"
+    state: "{{ packages.state | default('latest') }}"
     update_cache: "{{ packages.cache.update | default(true) }}"
     cache_valid_time: "{{ packages.cache.time | default(3600) }}"
     install_recommends: "{{ packages.recommends | default(false) }}"
