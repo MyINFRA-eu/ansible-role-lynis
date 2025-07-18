@@ -66,10 +66,14 @@ None.
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
+### lynis
+
+Install lynis, run audit and run pentest
+
+> value needs to be a boolean (true|false)
+
 ```
-var1: true
-var2: "string"
-var3: []
+lynis: true
 ```
 
 
